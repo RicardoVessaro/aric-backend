@@ -16,6 +16,8 @@ public class SecurityConfig {
             configurer.requestMatchers(HttpMethod.GET, "/system/**").permitAll();
         });
 
+        httpSecurity.csrf(csrf -> csrf.disable());
+
         return httpSecurity.build();
     }
 
