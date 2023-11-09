@@ -1,3 +1,6 @@
 src/main/resources/application.properties
 /target/
 /target/classes/
+/.idea/
+/shelf/
+/workspace.xml
