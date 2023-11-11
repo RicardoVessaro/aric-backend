@@ -50,6 +50,7 @@ public class AuthenticationService implements LogoutHandler {
             .build();
 
         authenticationValidator.validateRequiredFields(member);
+        authenticationValidator.validateUniqueUsername(member.getUsername());
 
         var savedMember = memberRepository.save(member);
 

@@ -17,6 +17,7 @@ public class AricApplication {
 
 	@Bean
 	public ApplicationRunner applicationRunner(List<EnumEntityRunner> enumEntityRunners) {
+
 		return runner -> {
 			for(EnumEntityRunner enumEntityRunner: enumEntityRunners) {
 				enumEntityRunner.run();
