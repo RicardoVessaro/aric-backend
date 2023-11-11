@@ -15,6 +15,7 @@ import rv.aric.security.entity.Token;
 import rv.aric.security.enums.EnumTokenType;
 import rv.aric.security.repository.MemberRepository;
 import rv.aric.security.repository.TokenRepository;
+import rv.aric.security.service.validator.AuthenticationValidator;
 
 @Service
 public class AuthenticationService implements LogoutHandler {
@@ -25,15 +26,18 @@ public class AuthenticationService implements LogoutHandler {
     private AuthenticationManager authenticationManager;
     private TokenRepository tokenRepository;
 
+    private AuthenticationValidator authenticationValidator;
+
     public AuthenticationService(MemberRepository memberRepository, PasswordEncoder passwordEncoder,
                                  JwtService jwtService, AuthenticationManager authenticationManager,
-                                 TokenRepository tokenRepository
+                                 TokenRepository tokenRepository, AuthenticationValidator authenticationValidator
     ) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.tokenRepository = tokenRepository;
+        this.authenticationValidator = authenticationValidator;
     }
 
     public String register(MemberDTO memberDTO) {
@@ -44,6 +48,8 @@ public class AuthenticationService implements LogoutHandler {
             .password(passwordEncoder.encode(memberDTO.password()))
             .biography(memberDTO.biography())
             .build();
+
+        authenticationValidator.validateRequiredFields(member);
 
         var savedMember = memberRepository.save(member);
 
