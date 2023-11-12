@@ -51,6 +51,9 @@ public class AuthenticationService implements LogoutHandler {
 
         authenticationValidator.validateRequiredFields(member);
         authenticationValidator.validateUniqueUsername(member.getUsername());
+        authenticationValidator.validateUniqueEmail(member.getEmail());
+        authenticationValidator.validateEmailPatttern(member.getEmail());
+        authenticationValidator.validatePasswordPattern(memberDTO.password());
 
         var savedMember = memberRepository.save(member);
 
