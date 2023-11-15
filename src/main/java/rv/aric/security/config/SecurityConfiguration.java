@@ -33,7 +33,7 @@ public class SecurityConfiguration {
             authHttp
                 .requestMatchers(HttpMethod.GET, "/system/check/**")
                 .permitAll()
-                .requestMatchers("/api/v1/auth/**")
+                .requestMatchers("/aric/api/v1/auth/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated();
@@ -45,7 +45,7 @@ public class SecurityConfiguration {
         .authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .logout(logout -> {
-            logout.logoutUrl("/api/v1/auth/logout");
+            logout.logoutUrl("/aric-api/v1/auth/logout");
             logout.addLogoutHandler(logoutHandler);
             logout.logoutSuccessHandler(((request, response, authentication) -> {
                 SecurityContextHolder.clearContext();

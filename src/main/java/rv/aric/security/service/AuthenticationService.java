@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 import rv.aric.security.common.dto.MemberDTO;
+import rv.aric.security.common.response.AuthenticationResponse;
 import rv.aric.security.common.utils.AuthenticationHeaderUtil;
 import rv.aric.security.entity.Member;
 import rv.aric.security.entity.Token;
@@ -16,6 +17,8 @@ import rv.aric.security.enums.EnumTokenType;
 import rv.aric.security.repository.MemberRepository;
 import rv.aric.security.repository.TokenRepository;
 import rv.aric.security.service.validator.AuthenticationValidator;
+
+import java.util.Date;
 
 @Service
 public class AuthenticationService implements LogoutHandler {
@@ -40,12 +43,12 @@ public class AuthenticationService implements LogoutHandler {
         this.authenticationValidator = authenticationValidator;
     }
 
-    public String register(MemberDTO memberDTO) {
+    public AuthenticationResponse register(MemberDTO memberDTO) {
         var member = Member.builder()
             .name(memberDTO.name())
             .username(memberDTO.username())
             .email(memberDTO.email())
-            .password(passwordEncoder.encode(memberDTO.password()))
+            .password(encodePassword(memberDTO))
             .biography(memberDTO.biography())
             .build();
 
@@ -61,10 +64,18 @@ public class AuthenticationService implements LogoutHandler {
 
         saveToken(savedMember, jwtToken);
 
-        return jwtToken;
+        return getAuthenticationResponse(savedMember.getId().toString(), jwtToken);
     }
 
-    public String authenticate(String username, String password) {
+    private String encodePassword(MemberDTO memberDTO) {
+        if(memberDTO.password().isEmpty()) {
+            return null;
+        }
+
+        return passwordEncoder.encode(memberDTO.password());
+    }
+
+    public AuthenticationResponse authenticate(String username, String password) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );
@@ -78,7 +89,7 @@ public class AuthenticationService implements LogoutHandler {
 
         saveToken(member, jwtToken);
 
-        return jwtToken;
+        return getAuthenticationResponse(member.getId().toString(), jwtToken);
     }
 
     @Override
@@ -103,6 +114,14 @@ public class AuthenticationService implements LogoutHandler {
             storedToken.setRevoked(true);
             tokenRepository.save(storedToken);
         }
+    }
+
+    private AuthenticationResponse getAuthenticationResponse(String memberId, String jwtToken) {
+        Date expirationDate = jwtService.extractExpiration(jwtToken);
+        String username = jwtService.extractUsername(jwtToken);
+        Long expiresIn = expirationDate.getTime() - new Date().getTime();
+
+        return new AuthenticationResponse(memberId, jwtToken, username, expiresIn);
     }
 
     private void revokeAllMemberTokens(Member member) {
